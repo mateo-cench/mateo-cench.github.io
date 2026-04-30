@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Premium Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: #0a0a0f;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 18px 14px 36px;
+  }
+
+  /* HEADER */
+  .header { text-align: center; padding: 14px 0 18px; }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #777;
+    margin-bottom: 9px;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .header h1 span { color: #FFFC00; }
+  .header p { margin-top: 5px; color: #555; font-size: 12px; }
+
+  /* CARDS */
+  .cards { display: flex; flex-direction: column; gap: 8px; }
+
+  .card {
+    background: #13131c;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 12px 13px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.13s;
+    user-select: none;
+  }
+  .card:active { transform: scale(0.975); }
+  .card.snap   { border-color: rgba(255,252,0,0.2); }
+  .card.spot   { border-color: rgba(29,185,84,0.2); }
+  .card.amusic { border-color: rgba(252,60,68,0.2); }
+  .card.atv    { border-color: rgba(160,160,200,0.14); }
+
+  .c-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .snap   .c-icon { background: #FFFC00; }
+  .spot   .c-icon { background: #1DB954; }
+  .amusic .c-icon { background: linear-gradient(135deg,#fc3c44,#ff6b6b); }
+  .atv    .c-icon { background: #1c1c1e; border:1px solid rgba(255,255,255,0.12); }
+
+  .c-text { flex: 1; }
+  .c-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .c-sub  { font-size: 11px; color: #4a4a5a; margin-top: 1px; }
+  .c-arrow { color: #2a2a3a; font-size: 20px; flex-shrink: 0; }
+
+  /* OVERLAY */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .overlay.active { display: flex; animation: fIn 0.15s ease; }
+  @keyframes fIn { from{opacity:0} to{opacity:1} }
+  @keyframes sUp { from{transform:translateY(28px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  /* SHEET */
+  .sheet {
+    background: #111118;
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 420px;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding-bottom: 24px;
+    animation: sUp 0.26s cubic-bezier(0.34,1.4,0.64,1);
+  }
+  .snap-sheet { border-top: 1px solid rgba(255,252,0,0.2); }
+  .gen-sheet  { border-top: 1px solid rgba(255,255,255,0.09); }
+
+  .handle {
+    width: 34px; height: 3px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    margin: 10px auto 0;
+  }
+
+  /* SHEET HEADER */
+  .sh-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px 0; }
+  .sh-logo {
+    width: 44px; height: 44px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .sh-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; }
+  .sh-sub   { font-size: 11px; color: #555; margin-top: 1px; }
+  .sh-close {
+    margin-left: auto; background: rgba(255,255,255,0.05);
+    border: none; color: #888; width: 26px; height: 26px;
+    border-radius: 50%; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  /* FEATURES */
+  .feats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 12px 14px 8px; }
+  .feat {
+    background: rgba(255,252,0,0.05);
+    border: 1px solid rgba(255,252,0,0.1);
+    border-radius: 10px; padding: 8px 10px;
+    font-size: 11px; display: flex; align-items: center; gap: 6px; color: #bbb;
+  }
+  .feat .fi { font-size: 13px; }
+
+  /* PLANS */
+  .plans-lbl {
+    padding: 0 14px 7px;
+    font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.09em; text-transform: uppercase; color: #3a3a4a;
+  }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 0 14px; }
+  .plan { border-radius: 13px; padding: 12px 10px; text-align: center; position: relative; }
+  .plan.mo { background: rgba(255,252,0,0.05); border: 1.5px solid rgba(255,252,0,0.18); }
+  .plan.yr { background: rgba(255,252,0,0.09); border: 1.5px solid rgba(255,252,0,0.42); }
+  .plan-badge {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    background: #FFFC00; color: #000; font-size: 7px; font-weight: 800;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 100px; white-space: nowrap;
+  }
+  .plan-per   { font-size: 10px; color: #777; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .plan-price { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #FFFC00; }
+  .plan-price small { font-size: 11px; font-weight: 400; color: #555; }
+  .plan-note  { font-size: 10px; color: #444; margin-top: 2px; }
+
+  /* BUTTONS */
+  .btns { padding: 12px 14px 0; display: flex; flex-direction: column; gap: 7px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 14px; border-radius: 11px;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; border: none; text-decoration: none;
+    transition: transform 0.12s, opacity 0.12s; width: 100%;
+  }
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-y { background: #FFFC00; color: #000; }
+  .btn-g { background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.28); color: #25D366; }
+
+  .note {
+    margin: 10px 14px 0;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 9px; padding: 9px 11px;
+    font-size: 11px; color: #444; line-height: 1.5; text-align: center;
+  }
+
+  /* GEN PLANS */
+  .gen-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 12px 14px 0; }
+  .gp { border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .gp.mo { background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); }
+  .gp.yr { background: rgba(255,255,255,0.07);  border: 1px solid rgba(255,255,255,0.16); }
+  .gp-per   { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .gp-price { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+  .gp.yr .gp-price { color: #FFFC00; }
+  .gp-note  { font-size: 10px; color: #444; margin-top: 2px; }
+
+  /* TOAST */
+  .toast {
+    display: none; position: fixed;
+    top: 14px; left: 50%; transform: translateX(-50%);
+    background: #1a1a26; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 10px 16px;
+    font-size: 12px; color: #bbb; z-index: 200;
+    white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .toast.show { display: block; animation: tIn 0.2s ease; }
+  @keyframes tIn { from{opacity:0;transform:translateX(-50%) translateY(-7px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+  .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #222; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="badge">✦ Premium Hub</div>
+    <h1>Get <span>Premium</span><br>For Less</h1>
+    <p>Tap any service to subscribe</p>
+  </div>
+
+  <div class="cards">
+    <div class="card snap" onclick="openSnap()">
+      <div class="c-icon">👻</div>
+      <div class="c-text">
+        <div class="c-name">Snapchat+</div>
+        <div class="c-sub">From GH₵30 / month</div>
+      </div>
+      <div class="c-arrow">›</div>
+    </div>
+
+    <div class="card spot" onclick="openService('spotify')">
+      <div class="c-icon">🎵</div>
+      <div class="c-text">
+        <div class="c-name">Spotify Premium</div>
+        <div class="c-sub">Ad-free music</div>
+      </div>
+      <div class="c-arrow">›</div>
+    </div>
+
+    <div class="card amusic" onclick="openService('applemusic')">
+      <div class="c-icon">🎶</div>
+      <div class="c-text">
+        <div class="c-name">Apple Music</div>
+        <div class="c-sub">90M+ songs</div>
+      </div>
+      <div class="c-arrow">›</div>
+    </div>
+
+    <div class="card atv" onclick="openService('appletv')">
+      <div class="c-icon">📺</div>
+      <div class="c-text">
+        <div class="c-name">Apple TV+</div>
+        <div class="c-sub">Award-winning originals</div>
+      </div>
+      <div class="c-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="footer">Contact via Snapchat or WhatsApp to order</div>
+</div>
+
+<!-- SNAPCHAT SHEET -->
+<div class="overlay" id="snapOverlay" onclick="outsideClose(event,'snapOverlay')">
+  <div class="sheet snap-sheet">
+    <div class="handle"></div>
+    <div class="sh-head">
+      <div class="sh-logo" style="background:#FFFC00">👻</div>
+      <div>
+        <div class="sh-title" style="color:#FFFC00">Snapchat+</div>
+        <div class="sh-sub">Exclusive premium features</div>
+      </div>
+      <button class="sh-close" onclick="closeSnap()">✕</button>
+    </div>
+
+    <div class="feats">
+      <div class="feat"><span class="fi">⭐</span>Solar System</div>
+      <div class="feat"><span class="fi">🔁</span>Custom Icons</div>
+      <div class="feat"><span class="fi">📍</span>Ghost Trails</div>
+      <div class="feat"><span class="fi">❤️</span>BFF Forever</div>
+      <div class="feat"><span class="fi">🏷️</span>Custom Badges</div>
+      <div class="feat"><span class="fi">📊</span>Story Rewatch</div>
+      <div class="feat"><span class="fi">🌙</span>Dark Mode</div>
+      <div class="feat"><span class="fi">🔔</span>Priority Story</div>
+    </div>
+
+    <div class="plans-lbl">Choose a Plan</div>
+    <div class="plans">
+      <div class="plan mo">
+        <div class="plan-per">Monthly</div>
+        <div class="plan-price">GH₵30<small>/mo</small></div>
+        <div class="plan-note">Cancel anytime</div>
+      </div>
+      <div class="plan yr">
+        <div class="plan-badge">Best Value</div>
+        <div class="plan-per">Yearly</div>
+        <div class="plan-price">GH₵100<small>/yr</small></div>
+        <div class="plan-note">Save GH₵260</div>
+      </div>
+    </div>
+
+    <div class="btns">
+      <a class="btn btn-y" id="snapSnapBtn" href="#" target="_blank" onclick="notify('Snapchat+')">👻 Order on Snapchat</a>
+      <a class="btn btn-g" id="snapWaBtn"   href="#" target="_blank" onclick="notify('Snapchat+')">💬 Order via WhatsApp</a>
+    </div>
+    <div class="note">📞 We respond within minutes after you reach out.</div>
+  </div>
+</div>
+
+<!-- GENERIC SHEET -->
+<div class="overlay" id="genOverlay" onclick="outsideClose(event,'genOverlay')">
+  <div class="sheet gen-sheet">
+    <div class="handle"></div>
+    <div class="sh-head">
+      <div class="sh-logo" id="gLogo"></div>
+      <div>
+        <div class="sh-title" id="gTitle"></div>
+        <div class="sh-sub"   id="gDesc"></div>
+      </div>
+      <button class="sh-close" onclick="closeGen()">✕</button>
+    </div>
+
+    <div class="gen-plans">
+      <div class="gp mo">
+        <div class="gp-per">Monthly</div>
+        <div class="gp-price" id="gMonthly"></div>
+        <div class="gp-note">Cancel anytime</div>
+      </div>
+      <div class="gp yr">
+        <div class="gp-per">Yearly</div>
+        <div class="gp-price" id="gYearly"></div>
+        <div class="gp-note">Best deal</div>
+      </div>
+    </div>
+
+    <div class="btns">
+      <a class="btn btn-y" id="gSnapBtn" href="#" target="_blank" onclick="notifyGen()">👻 Order on Snapchat</a>
+      <a class="btn btn-g" id="gWaBtn"   href="#" target="_blank" onclick="notifyGen()">💬 Order via WhatsApp</a>
+    </div>
+    <div class="note">We'll respond within minutes after you contact us.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SNAP = "vibewith_teo";
+  const WA   = "233558726381";
+
+  const SVC = {
+    spotify:    { icon:"🎵", color:"#1DB954", title:"Spotify Premium",  desc:"Ad-free music & podcasts",       mo:"GH₵35", yr:"GH₵320", msg:"Hi! I want Spotify Premium" },
+    applemusic: { icon:"🎶", color:"#fc3c44", title:"Apple Music",       desc:"90M+ songs, lossless audio",     mo:"GH₵35", yr:"GH₵320", msg:"Hi! I want Apple Music Premium" },
+    appletv:    { icon:"📺", color:"#a0a0c8", title:"Apple TV+",         desc:"Award-winning originals & films", mo:"GH₵40", yr:"GH₵360", msg:"Hi! I want Apple TV+ Premium" }
+  };
+
+  let cur = null;
+
+  document.getElementById('snapSnapBtn').href = `https://www.snapchat.com/add/${SNAP}`;
+  document.getElementById('snapWaBtn').href   = `https://wa.me/${WA}?text=${encodeURIComponent("Hi! I want to subscribe to Snapchat+ Premium")}`;
+
+  function openSnap() {
+    document.getElementById('snapOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSnap() {
+    document.getElementById('snapOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function openService(key) {
+    cur = key;
+    const s = SVC[key];
+    const lg = document.getElementById('gLogo');
+    lg.textContent = s.icon;
+    lg.style.background = s.color + '28';
+    document.getElementById('gTitle').textContent   = s.title;
+    document.getElementById('gDesc').textContent    = s.desc;
+    document.getElementById('gMonthly').textContent = s.mo;
+    document.getElementById('gYearly').textContent  = s.yr;
+    document.getElementById('gSnapBtn').href = `https://www.snapchat.com/add/${SNAP}`;
+    document.getElementById('gWaBtn').href   = `https://wa.me/${WA}?text=${encodeURIComponent(s.msg)}`;
+    document.getElementById('genOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeGen() {
+    document.getElementById('genOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function outsideClose(e, id) {
+    if (e.target.id === id) {
+      document.getElementById(id).classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function notify(label) {
+    const t = document.getElementById('toast');
+    t.textContent = `📩 Redirecting for ${label}…`;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+  function notifyGen() { if (cur) notify(SVC[cur].title); }
+</script>
+</body>
+</html>
